@@ -1,23 +1,43 @@
 def check_temperature_warnings(self):
     """Sprawdza czy temperatury nie są za wysokie"""
+    print("🔔 SPRAWDZANIE OSTRZEŻEŃ TEMPERATUR:")
     try:
         import psutil
         temps = psutil.sensors_temperatures()
+        warning_count = 0
+        
         for name, entries in temps.items():
             for entry in entries:
-                if entry.current > 80:  # Powyżej 80°C - ostrzeżenie
+                if entry.current > 70:  # Powyżej 70°C - ostrzeżenie
+                    warning_count += 1
+                    print(f"  ⚠️ Wysoka temperatura: {name} - {entry.current}°C")
                     self.send_notification(
                         "🌡️ Wysoka temperatura!",
                         f"{name}: {entry.current}°C"
                     )
-    except:
-        pass
+        
+        if warning_count == 0:
+            print("  ✅ Wszystkie temperatury w normie")
+        else:
+            print(f"  ⚠️ Znaleziono {warning_count} ostrzeżeń")
+            
+    except Exception as e:
+        print(f"  ❌ Błąd sprawdzania temperatur: {e}")
+    print("")
 
 def send_notification(self, title, message):
     """Wysyła powiadomienie systemowe"""
-    subprocess.run([
-        'notify-send', 
-        '-i', 'dialog-warning',
-        title, 
-        message
-    ])
+    try:
+        subprocess.run([
+            'notify-send', 
+            '-i', 'dialog-warning',
+            '-t', '5000',  # Czas wyświetlania (5 sekund)
+            '-u', 'normal',  # Priorytet
+            title, 
+            message
+        ], check=True)
+        print(f"  📢 Wysłano powiadomienie: {title}")
+    except subprocess.CalledProcessError:
+        print("  ❌ Nie można wysłać powiadomienia")
+    except FileNotFoundError:
+        print("  ❌ Brak narzędzia 'notify-send'")
