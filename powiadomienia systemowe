@@ -1,0 +1,23 @@
+def check_temperature_warnings(self):
+    """Sprawdza czy temperatury nie są za wysokie"""
+    try:
+        import psutil
+        temps = psutil.sensors_temperatures()
+        for name, entries in temps.items():
+            for entry in entries:
+                if entry.current > 80:  # Powyżej 80°C - ostrzeżenie
+                    self.send_notification(
+                        "🌡️ Wysoka temperatura!",
+                        f"{name}: {entry.current}°C"
+                    )
+    except:
+        pass
+
+def send_notification(self, title, message):
+    """Wysyła powiadomienie systemowe"""
+    subprocess.run([
+        'notify-send', 
+        '-i', 'dialog-warning',
+        title, 
+        message
+    ])
